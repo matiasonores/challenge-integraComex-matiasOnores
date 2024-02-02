@@ -1,0 +1,120 @@
+CREATE DATABASE IC_Clientes;
+GO
+
+USE IC_Clientes;
+GO
+
+/****** Object:  Table [dbo].[Clientes]    Script Date: 02/02/2024 9:59:29 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Clientes](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[Cuit] [bigint] NOT NULL,
+	[RazonSocial] [varchar](255) NOT NULL,
+	[Telefono] [varchar](20) NOT NULL,
+	[Direccion] [varchar](200) NOT NULL,
+	[Activo] [bit] NOT NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+ALTER TABLE [dbo].[Clientes] ADD  DEFAULT ((1)) FOR [Activo]
+GO
+/****** Object:  StoredProcedure [dbo].[CrearCliente]    Script Date: 02/02/2024 9:59:29 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[CrearCliente]
+    @cuit BIGINT,
+    @razonSocial VARCHAR(255),
+    @telefono VARCHAR(20),
+    @direccion VARCHAR(200),
+    @activo BIT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    INSERT INTO Clientes (CUIT, RazonSocial, Telefono, Direccion, Activo)
+    OUTPUT INSERTED.Id
+    VALUES (@cuit, @razonSocial, @telefono, @direccion, @activo);
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[EliminarCliente]    Script Date: 02/02/2024 9:59:29 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[EliminarCliente]
+    @id INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DELETE FROM Clientes
+    WHERE Id = @id;
+
+    SELECT @id AS ClienteId;
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[ModificarCliente]    Script Date: 02/02/2024 9:59:29 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[ModificarCliente]
+    @id INT,
+    @cuit BIGINT,
+    @razonSocial VARCHAR(255),
+    @telefono VARCHAR(20),
+    @direccion VARCHAR(200),
+    @activo BIT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    UPDATE Clientes
+    SET CUIT = @cuit,
+        RazonSocial = @razonSocial,
+        Telefono = @telefono,
+        Direccion = @direccion,
+        Activo = @activo
+    WHERE Id = @id;
+
+    SELECT @id AS ClienteId;
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[ObtenerClientePorId]    Script Date: 02/02/2024 9:59:29 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[ObtenerClientePorId]
+    @id INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT *
+    FROM Clientes
+    WHERE Id = @id;
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[ObtenerClientes]    Script Date: 02/02/2024 9:59:29 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[ObtenerClientes]
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT *
+    FROM Clientes
+END;
+GO
