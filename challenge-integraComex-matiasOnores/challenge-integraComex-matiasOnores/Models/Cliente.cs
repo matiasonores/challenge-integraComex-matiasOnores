@@ -11,6 +11,7 @@ namespace challenge_integraComex_matiasOnores.Models
         public int Id { get; set; }
 
         [Required(ErrorMessage = "El CUIT es requerido.")]
+        
         public long CUIT { get; set; }
 
         [Required(ErrorMessage = "La razón social es requerida.")]

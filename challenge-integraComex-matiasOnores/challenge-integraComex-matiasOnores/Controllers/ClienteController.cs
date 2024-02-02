@@ -1,6 +1,8 @@
-﻿using challenge_integraComex_matiasOnores.Models;
+﻿using Antlr.Runtime.Misc;
+using challenge_integraComex_matiasOnores.Models;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Net.Http;
@@ -13,64 +15,100 @@ namespace challenge_integraComex_matiasOnores.Controllers
 {
     public class ClienteController : Controller
     {
+        private ClientesDB _clientesDB = new ClientesDB();
         // GET: Cliente
         [HttpGet]
         public ActionResult Index()
         {
-            //List<Cliente> clientes = new List<Cliente>();
-
-            var clientes = new List<Cliente>
+            List<Cliente> clientes;
+            try
             {
-                new Cliente
-                {
-                    Id = 1,
-                    CUIT = 12345678901,
-                    RazonSocial = "Empresa A",
-                    Telefono = "123456789",
-                    Direccion = "Calle 123",
-                    Activo = true
-                },
-                new Cliente
-                {
-                    Id = 2,
-                    CUIT = 98765432109,
-                    RazonSocial = "Empresa B",
-                    Telefono = "987654321",
-                    Direccion = "Avenida 456",
-                    Activo = false
-                }
-                // Puedes agregar más clientes aquí si lo deseas
-            };
+                clientes = ObtenerClientes();
+            }
+            catch (Exception ex)
+            {
+
+                throw ex;
+            }
+
             return View(clientes);
         }
+
+        private List<Cliente> ObtenerClientes()
+        {
+            List<Cliente> clientes = new List<Cliente>();
+            try
+            {
+                DataTable datosClientes = _clientesDB.ObtenerClientes();
+
+                if (datosClientes != null && datosClientes.Rows.Count > 0)
+                {
+                    foreach (DataRow row in datosClientes.Rows)
+                    {
+                        Cliente cliente = CrearCliente(row);
+                        clientes.Add(cliente);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+
+                throw ex;
+            }
+
+            return clientes;
+        }
+
+        private Cliente CrearCliente(DataRow row)
+        {
+            Cliente cliente = new Cliente();
+            try
+            {
+                cliente.Id = Convert.ToInt32(row["Id"]);
+                cliente.CUIT = Convert.ToInt64(row["CUIT"]);
+                cliente.RazonSocial = row["RazonSocial"].ToString();
+                cliente.Telefono = row["Telefono"].ToString();
+                cliente.Direccion = row["Direccion"].ToString();
+                cliente.Activo = Convert.ToBoolean(row["Activo"]);
+            }
+            catch (Exception ex)
+            {
+
+                throw ex;
+            }
+
+            return cliente;
+        }
+
         // POST: Cliente/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Create(Cliente nuevo)
         {
-            if (ModelState.IsValid)
+            bool creado = false;
+            string mensaje = "";
+            JsonResult resultado;
+            try
             {
-                //using (SqlConnection connection = new SqlConnection(""))
-                //{
-                //    connection.Open();
-                //    using (SqlCommand cmd = new SqlCommand("NombreDeTuStoredProcedure", connection))
-                //    {
-                //        cmd.CommandType = System.Data.CommandType.StoredProcedure;
-                //        cmd.Parameters.AddWithValue("@Parametro1", nuevo.CUIT);
-                //        cmd.Parameters.AddWithValue("@Parametro2", nuevo.RazonSocial);
-                //        cmd.Parameters.AddWithValue("@Parametro3", nuevo.Direccion);
-                //        cmd.Parameters.AddWithValue("@Parametro4", nuevo.Telefono);
-                //        cmd.Parameters.AddWithValue("@Parametro5", nuevo.Activo);
 
-                //        cmd.ExecuteNonQuery();
-                //    }
-                //}
-                //return RedirectToAction("Index", "Cliente");
+                if (ModelState.IsValid)
+                {
+                    creado = _clientesDB.CrearCliente(nuevo);
+                    mensaje = creado ? "¡Cliente creado exitosamente" : "Ocurrió un error al crear el cliente";
+                }
+                else
+                {
+                    mensaje = "El modelo no es válido";
+                }
+
+                resultado = Json(new { success = true, message = mensaje }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                resultado = Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
             }
 
-            //return View(nuevo);
-
-            return Json(new { success = true, message = "Cliente creado exitosamente" }, JsonRequestBehavior.AllowGet);
+            return resultado;
         }
 
         [HttpGet]
@@ -79,25 +117,104 @@ namespace challenge_integraComex_matiasOnores.Controllers
             return PartialView();
         }
 
-        public ActionResult Edit()
+        [HttpGet]
+        public ActionResult Edit(int id)
         {
-            Cliente cliente = new Cliente
+            Cliente cliente = null;
+            try
             {
-                Id = 2,
-                CUIT = 98765432109,
-                RazonSocial = "Empresa B",
-                Telefono = "987654321",
-                Direccion = "Avenida 456",
-                Activo = false
-            };
-            return View(cliente);
-
+                DataTable datosCliente = _clientesDB.ObtenerClientePorId(id);
+                if (datosCliente != null && datosCliente.Rows.Count > 0)
+                {
+                    foreach (DataRow row in datosCliente.Rows)
+                    {
+                        cliente = CrearCliente(row);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            return PartialView(cliente);
         }
 
+        [HttpPost]
+        public ActionResult Edit(Cliente cliente)
+        {
+            bool modificado = false;
+            string mensaje = "";
+            JsonResult resultado;
+
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    modificado = _clientesDB.ModificarCliente(cliente);
+
+                    mensaje = modificado ? "Cliente modificado exitosamente" : "Ocurrió un error al modificar el cliente";
+                }
+                else
+                {
+                    mensaje = "El modelo no es válido";
+                }
+
+                resultado = Json(new { success = true, message = mensaje }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                resultado = Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+
+            return resultado;
+        }
+
+
+        [HttpGet]
+        public ActionResult Eliminar(int id)
+        {
+            Cliente cliente = null;
+            try
+            {
+                DataTable datosCliente = _clientesDB.ObtenerClientePorId(id);
+                if (datosCliente != null && datosCliente.Rows.Count > 0)
+                {
+                    foreach (DataRow row in datosCliente.Rows)
+                    {
+                        cliente = CrearCliente(row);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            return PartialView(cliente);
+        }
+
+        [HttpPost]
         public ActionResult Delete(int id)
         {
+            bool eliminado = false;
+            string mensaje = "";
+            JsonResult resultado;
 
-            return View();
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    eliminado = _clientesDB.EliminarCliente(id);
+                    mensaje = eliminado ? "Cliente eliminado exitosamente" : "Ocurrió un error al eliminar el cliente";
+                }
+
+                resultado = Json(new { success = eliminado, message = mensaje }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                resultado = Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+
+            return resultado;
 
         }
 

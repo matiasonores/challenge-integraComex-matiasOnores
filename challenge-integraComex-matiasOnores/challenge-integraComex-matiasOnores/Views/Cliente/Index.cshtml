@@ -9,7 +9,7 @@
 <h2>INTEGRACOMEX - CLIENTES</h2>
 
 <p>
-    <button id="btnCrear" type="button" class="btn btn-info">Crear</button>
+    <button id="btnCrear" type="button" class="btn btn-outline-success">Crear</button>
 
 </p>
 <table class="table table-hover" id="clientTable">
@@ -52,9 +52,10 @@
                 @Html.DisplayFor(modelItem => item.Activo)
             </td>
             <td>
-                @Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }) |
-                @Html.ActionLink("Details", "Details", new { /* id=item.PrimaryKey */ }) |
-                @Html.ActionLink("Delete", "Delete", new { /* id=item.PrimaryKey */ })
+                  @Html.ActionLink("Edit", "Edit", new { id = item.Id }, new { @class = "btn btn-outline-info edit-link" }) |
+
+                @Html.ActionLink("Eliminar", "Eliminar", new { id = item.Id }, new { @class = "btn btn-outline-danger delete-link" })
+
             </td>
         </tr>
     }
@@ -67,8 +68,8 @@
 <div class="modal" id="modalCrear" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Crear cliente</h5>
+            <div class="modal-header" >
+                <h5 class="modal-title" id="modalTitle">Crear cliente</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div id="modalCrearBody" class="modal-body">
@@ -89,25 +90,24 @@
     </div>
 
 <script>
-    $(document).ready(function () {
-
-        $("#btnCrear").click(function () {
-            $.ajax({
-                url: '/Cliente/Crear',
-                type: 'GET',
-                success: function (response) {
-
-                    $("#modalCrearBody").html(response);
-                    $('#modalCrear').modal('show');
-                },
-                error: function (xhr, status, error) {
-                    console.error(xhr.responseText);
-                }
-            });
-        });
-    });
-
     function SubmitForm(form) {
+        var cuit = document.getElementById('txtCuit').value;
+        if (cuit.length !== 11) {
+            alert('El CUIT debe tener 11 dígitos.');
+            return false;
+        }
+
+        var telefono = document.getElementById('txtTelefono').value;
+
+        if (!/^\d+$/.test(telefono)) {
+            alert('El teléfono debe contener solo números.');
+            return false;
+        }
+
+        var razonSocial = document.getElementById('txtRazonSocial');
+        razonSocial.disabled = false;
+        razonSocial.readonly = false;
+
         $.ajax({
             type: "POST",
             url: form.action,
@@ -135,6 +135,65 @@
 
         return false;
     }
+
+    //Ajax para crear un cliente
+    $(document).ready(function () {
+
+        $("#btnCrear").click(function () {
+            $.ajax({
+                url: '/Cliente/Crear',
+                type: 'GET',
+                success: function (response) {
+
+                    $("#modalCrearBody").html(response);
+                    $('#modalCrear').modal('show');
+                },
+                error: function (xhr, status, error) {
+                    console.error(xhr.responseText);
+                }
+            });
+        });
+    });
+
+    //Ajax para editar un cliente 
+    $(document).ready(function () {
+        $(".edit-link").click(function (e) {
+            e.preventDefault(); // Evitar el comportamiento predeterminado del enlace
+
+            var id = $(this).attr("href").split("/").pop(); // Obtener el ID de la URL
+
+            $.ajax({
+                url: '/Cliente/Edit/' + id,
+                type: 'GET',
+                success: function (response) {
+                    $("#modalCrearBody").html(response);
+                    $("#modalTitle").html('Editar cliente');
+                    $('#modalCrear').modal('show');
+                }
+            });
+        });
+    });
+
+    //Ajax para eliminar un cliente 
+    $(document).ready(function () {
+        $(".delete-link").click(function (e) {
+            e.preventDefault(); // Evitar el comportamiento predeterminado del enlace
+
+            var id = $(this).attr("href").split("/").pop(); // Obtener el ID de la URL
+
+            $.ajax({
+                url: '/Cliente/Eliminar/' + id,
+                type: 'GET',
+                success: function (response) {
+                    $("#modalCrearBody").html(response);
+                    $("#modalTitle").html('Eliminar cliente');
+                    $('#modalCrear').modal('show');
+                }
+            });
+        });
+    });
+ 
+    
 
 
 </script>

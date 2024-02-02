@@ -150,7 +150,6 @@ namespace challenge_integraComex_matiasOnores.Models
                 SetParameter("@activo", cliente.Activo);
                 DataTable resultado = EjecutarComando();
 
-                // Verificar si la consulta devolvió al menos una fila
                 creado = resultado != null && resultado.Rows.Count > 0;
             }
             catch (Exception ex)
@@ -196,7 +195,6 @@ namespace challenge_integraComex_matiasOnores.Models
                 SetParameter("@id", id);
                 DataTable resultado = EjecutarComando();
 
-                // Verificar si la consulta devolvió al menos una fila
                 eliminado = resultado != null && resultado.Rows.Count > 0;
             }
             catch (Exception ex)

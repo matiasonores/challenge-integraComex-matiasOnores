@@ -1,0 +1,37 @@
+﻿@model challenge_integraComex_matiasOnores.Models.Cliente
+
+<div>
+    <dl class="dl-horizontal">
+
+
+        <dt>
+            @Html.DisplayNameFor(model => model.CUIT)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.CUIT)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.RazonSocial)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.RazonSocial)
+        </dd>
+
+
+
+    </dl>
+
+    @using (Html.BeginForm("Delete", "Cliente", FormMethod.Post, new { onsubmit = "return SubmitForm(this)" }))
+
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(model => model.Id)
+
+        <div class="form-actions no-color">
+            <input type="submit" value="Eliminar" class="btn btn-outline-danger" />
+        </div>
+    }
+</div>

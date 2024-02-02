@@ -1,24 +1,16 @@
 ﻿@model challenge_integraComex_matiasOnores.Models.Cliente
 
-@{
-    ViewBag.Title = "Edit";
-}
+@using (Html.BeginForm("Edit", "Cliente", FormMethod.Post, new { onsubmit = "return SubmitForm(this)" }))
 
-<h2>Edit</h2>
-
-
-@using (Html.BeginForm())
 {
     @Html.AntiForgeryToken()
-    
+
     <div class="form-horizontal">
-        <h4>Cliente</h4>
-        <hr />
         @Html.ValidationSummary(true, "", new { @class = "text-danger" })
         <div class="form-group">
             @Html.LabelFor(model => model.CUIT, htmlAttributes: new { @class = "control-label col-md-2" })
             <div class="col-md-10">
-                @Html.EditorFor(model => model.CUIT, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.EditorFor(model => model.CUIT, new { htmlAttributes = new { @class = "form-control", id = "txtCuit" } })
                 @Html.ValidationMessageFor(model => model.CUIT, "", new { @class = "text-danger" })
             </div>
         </div>
@@ -26,7 +18,8 @@
         <div class="form-group">
             @Html.LabelFor(model => model.RazonSocial, htmlAttributes: new { @class = "control-label col-md-2" })
             <div class="col-md-10">
-                @Html.EditorFor(model => model.RazonSocial, new { htmlAttributes = new { @class = "form-control" } })
+
+                @Html.EditorFor(model => model.RazonSocial, new { htmlAttributes = new { @class = "form-control", id = "txtRazonSocial", disabled = "disabled", @readonly = "readonly" } })
                 @Html.ValidationMessageFor(model => model.RazonSocial, "", new { @class = "text-danger" })
             </div>
         </div>
@@ -34,7 +27,7 @@
         <div class="form-group">
             @Html.LabelFor(model => model.Telefono, htmlAttributes: new { @class = "control-label col-md-2" })
             <div class="col-md-10">
-                @Html.EditorFor(model => model.Telefono, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.EditorFor(model => model.Telefono, new { htmlAttributes = new { @class = "form-control", id = "txtTelefono" } })
                 @Html.ValidationMessageFor(model => model.Telefono, "", new { @class = "text-danger" })
             </div>
         </div>
@@ -59,15 +52,11 @@
 
         <div class="form-group">
             <div class="col-md-offset-2 col-md-10">
-                <input type="submit" value="Save" class="btn btn-default" />
+                <input type="submit" value="Editar" class="btn btn-outline-primary" />
             </div>
         </div>
     </div>
 }
-
-<div>
-    @Html.ActionLink("Back to List", "Index")
-</div>
 
 @section Scripts {
     @Scripts.Render("~/bundles/jqueryval")
